@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.loadCars = void 0;
-let cars = [];
+const carService_1 = require("../services/carService");
 const loadCars = (req, res) => {
     try {
         const newCars = req.body;
@@ -9,7 +9,7 @@ const loadCars = (req, res) => {
             res.status(400).json({ error: 'Invalid format' });
             return;
         }
-        cars = newCars;
+        (0, carService_1.registerCars)(newCars);
         res.status(200).json({ message: 'Car list registered' });
     }
     catch (error) {

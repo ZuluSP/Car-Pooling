@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
-
-let cars: { id: number; seats: number }[] = [];
+import { registerCars } from '../services/carService';
 
 export const loadCars = (req: Request, res: Response): void => {
   try {
@@ -11,7 +10,8 @@ export const loadCars = (req: Request, res: Response): void => {
       return;
     }
 
-    cars = newCars;
+    registerCars(newCars);
+
     res.status(200).json({ message: 'Car list registered' });
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
