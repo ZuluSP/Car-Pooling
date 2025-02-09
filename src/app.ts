@@ -4,6 +4,7 @@ import statusRoutes from './routes/statusRoutes';
 import carRoutes from './routes/carRoutes';
 import journeyRoutes from './routes/journeyRoutes';
 import dropoffRoutes from './routes/dropoffRoutes';
+import locateRoutes from './routes/locateRoutes';
 
 
 
@@ -17,5 +18,6 @@ app.use(statusRoutes);
 app.use(carRoutes);
 app.use(journeyRoutes);
 app.use(dropoffRoutes);
+app.use(locateRoutes);
 
 export default app;

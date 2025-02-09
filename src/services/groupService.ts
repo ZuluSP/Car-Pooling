@@ -1,4 +1,5 @@
 import { Group } from '../models/group.model';
+import { getCars } from './carService';
 
 
 let waitingGroups: Group[] = [];
@@ -34,4 +35,24 @@ export const removeGroup = (groupId: number): boolean => {
   }
 
   return false;
+};
+
+export const getGroupCar = (groupId: number): { status: number; car?: { id: number; seats: number }, message?: string } => {
+  const assignedCarId = assignedGroups.get(groupId);
+
+  if (assignedCarId !== undefined) {
+    const cars = getCars();
+    const car = cars.find(c => c.id === assignedCarId);
+
+    if (car) {
+      return { status: 200, car: { id: car.id, seats: car.seats } };
+    }
+  }
+
+  const isWaiting = waitingGroups.some(group => group.id === groupId);
+  if (isWaiting) { 
+    return { status: 204 };
+  }
+
+  return { status: 404, message: 'Group not found' };
 };

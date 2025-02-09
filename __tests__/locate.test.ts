@@ -3,11 +3,11 @@ import app from '../src/app';
 import { registerCars } from '../src/services/carService';
 import { clearGroups } from '../src/services/groupService';
 
-describe('POST /locate', () => {
+describe.only('POST /locate', () => {
   beforeEach(() => {
     registerCars([
       { id: 1, seats: 4 },
-      { id: 2, seats: 6 }
+      { id: 2, seats: 5 }
     ]);
     clearGroups();
   });
@@ -31,7 +31,7 @@ describe('POST /locate', () => {
       .post('/locate')
       .send('ID=1')
       .set('Content-Type', 'application/x-www-form-urlencoded');
-
+    // usually 204 messages shouldnt have a body. In this case, expecting a 204 sholuld be enough.
     expect(response.status).toBe(204);
   });
 
