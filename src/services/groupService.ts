@@ -20,3 +20,18 @@ export const clearGroups = () => {
   waitingGroups = [];
   assignedGroups.clear();
 };
+
+export const removeGroup = (groupId: number): boolean => {
+  if (assignedGroups.has(groupId)) {
+    assignedGroups.delete(groupId);
+    return true;
+  }
+
+  const index = waitingGroups.findIndex(group => group.id === groupId);
+  if (index !== -1) {
+    waitingGroups.splice(index, 1);
+    return true;
+  }
+
+  return false;
+};
