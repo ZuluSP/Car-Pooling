@@ -1,7 +1,7 @@
 import { Group } from '../models/group.model';
 import { getCars } from './carService';
 
-
+// waitingGroups as FIFO.
 let waitingGroups: Group[] = [];
 let assignedGroups: Map<number, number> = new Map();
 
@@ -56,3 +56,21 @@ export const getGroupCar = (groupId: number): { status: number; car?: { id: numb
 
   return { status: 404, message: 'Group not found' };
 };
+
+
+export const assignWaitingGroupToCar = () => {
+  for (let i = 0; i < waitingGroups.length; i++) {
+    const group = waitingGroups[i];
+
+    for (const car of getCars()) {
+      if (car.seats - car.occupiedSeats >= group.people) {
+        car.occupiedSeats += group.people;
+        assignGroupToCar(group.id, car.id);
+        waitingGroups.splice(i, 1); // We delete elements making sure a FIFO system.
+        return { status: 200, message: `Group ${group.id} assigned to car ${car.id} after dropoff` };
+      }
+    }
+  }
+  return { status: 200, message: 'No waiting group could be assigned to a car' };
+};
+

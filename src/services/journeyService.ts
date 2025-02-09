@@ -1,6 +1,6 @@
 import { Group } from '../models/group.model';
 import { getCars } from './carService';
-import { addGroupToWaitingList, assignGroupToCar, getAssignedCar, removeGroup } from './groupService';
+import { addGroupToWaitingList, assignGroupToCar, assignWaitingGroupToCar, getAssignedCar, removeGroup } from './groupService';
 
 export const registerJourney = (group: Group): { status: number; message: string } => {
   if (!group || typeof group.id !== 'number' || typeof group.people !== 'number') {
@@ -29,11 +29,15 @@ export const dropoffGroup = (groupId: number): { status: number; message: string
     const car = cars.find(c => c.id === carId);
 
     if (car) {
-      car.occupiedSeats -= car.occupiedSeats; // Libera los asientos del coche
+      car.occupiedSeats -= car.occupiedSeats;
     }
 
     removeGroup(groupId);
-    return { status: 200, message: `Group ${groupId} removed from car ${carId} and seats freed` };
+
+    // After the group have dropped, we need to assign another waitingGroup to a car.
+    const { message } = assignWaitingGroupToCar();
+    
+    return { status: 200, message: `Group ${groupId} removed from car ${carId} and seats freed. ${message}` };
   }
 
   // This condition is if the group wasnt assigned to a car, but it was waiting
