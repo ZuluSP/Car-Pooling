@@ -1,4 +1,4 @@
-# Car Pooling Service - Cabify Backend Challenge
+# Car Pooling Service - Backend API
 
 This project is a backend service designed to efficiently manage car pooling by assigning available cars to passenger groups while ensuring FIFO order for waiting groups and optimal resource utilization.
 
@@ -165,7 +165,7 @@ ID=1
 ✅ Processing remains under `40s`, ensuring scalability.  
 
 ### **3️⃣ Docker Compatibility**
-✅ Port set to `9091` for compatibility with Cabify's requirements.  
+✅ Port set to `9091` for compatibility with requirements.  
 ✅ Respects original `Dockerfile` structure while adapting for Node.js.  
 
 ---
