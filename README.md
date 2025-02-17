@@ -1,220 +1,180 @@
-# Car Pooling Service Challenge
+# Car Pooling Service - Cabify Backend Challenge
 
-Design/implement a system to manage car pooling.
+This project is a backend service designed to efficiently manage car pooling by assigning available cars to passenger groups while ensuring FIFO order for waiting groups and optimal resource utilization.
 
-At Cabify we provide the service of taking people from point A to point B.
-So far we have done it without sharing cars with multiple groups of people.
-This is an opportunity to optimize the use of resources by introducing car
-pooling.
+## 📌 Features
+✅ REST API built with Node.js + TypeScript + Express  
+✅ FIFO queue for waiting groups  
+✅ Optimized data structures (`Map<>` for fast lookup)  
+✅ Scalable for `10^4 - 10^5` cars and groups  
+✅ Fully tested with Jest (unit, integration & performance tests)  
+✅ Dockerized for easy deployment  
 
-You have been assigned to build the car availability service that will be used
-to track the available seats in cars.
+---
 
-Cars have a different amount of seats available, they can accommodate groups of
-up to 4, 5 or 6 people.
+## 🚀 Getting Started
 
-People requests cars in groups of 1 to 6. People in the same group want to ride
-on the same car. You can take any group at any car that has enough empty seats
-for them. If it's not possible to accommodate them, they're willing to wait until 
-there's a car available for them. Once a car is available for a group
-that is waiting, they should ride. 
+### **1️⃣ Installation**
+```bash
+git clone <REPO_URL>
+cd car-pooling-challenge
+npm install
+```
 
-Once they get a car assigned, they will journey until the drop off, you cannot
-ask them to take another car (i.e. you cannot swap them to another car to
-make space for another group).
+### **2️⃣ Compile TypeScript**
+```bash
+npm run build
+```
 
-In terms of fairness of trip order: groups should be served as fast as possible,
-but the arrival order should be kept when possible.
-If group B arrives later than group A, it can only be served before group A
-if no car can serve group A.
+### **3️⃣ Run the Server**
+```bash
+npm run start
+```
+✅ The server will run on **http://localhost:9091**  
 
-For example: a group of 6 is waiting for a car and there are 4 empty seats at
-a car for 6; if a group of 2 requests a car you may take them in the car.
-This may mean that the group of 6 waits a long time,
-possibly until they become frustrated and leave.
+### **4️⃣ Check API Health**
+```bash
+curl http://localhost:9091/status
+```
+Expected response:
+```json
+"Service is running"
+```
 
-## Evaluation rules
+---
 
-This challenge has a partially automated scoring system. This means that before
-it is seen by the evaluators, it needs to pass a series of automated checks
-and scoring.
+## 🧪 Running Tests
 
-### Checks
+### **Run all tests**
+```bash
+npm test
+```
 
-All checks need to pass in order for the challenge to be reviewed.
+### **Run performance tests**
+```bash
+npm test -- performance.test.ts
+```
+📌 Performance test ensures the service can handle `100,000+` cars & groups efficiently.  
 
-- The `acceptance` test step in the `.gitlab-ci.yml` must pass in master before you
-submit your solution. We will not accept any solutions that do not pass or omit
-this step. This is a public check that can be used to assert that other tests 
-will run successfully on your solution. **This step needs to run without 
-modification**
-- _"further tests"_ will be used to prove that the solution works correctly. 
-These are not visible to you as a candidate and will be run once you submit 
-the solution
+---
 
-### Scoring
+## 🐳 Running with Docker
 
-There is a number of scoring systems being run on your solution after it is 
-submitted. It is ok if these do not pass, but they add information for the
-reviewers.
+### **1️⃣ Build the Docker image**
+```bash
+docker build -t carpooling-service .
+```
 
-## API
+### **2️⃣ Run the container**
+```bash
+docker run -p 9091:9091 carpooling-service
+```
 
-To simplify the challenge and remove language restrictions, this service must
-provide a REST API which will be used to interact with it.
+### **3️⃣ Verify the API is running**
+```bash
+curl http://localhost:9091/status
+```
+✅ If successful, it should return `"Service is running"`  
 
-This API must comply with the following contract:
+---
 
-### GET /status
+## 🔗 API Endpoints
 
-Indicate the service has started up correctly and is ready to accept requests.
+### **1️⃣ Health Check**
+**`GET /status`**  
+✅ Returns `200 OK` if the service is running  
 
-Responses:
+---
 
-* **200 OK** When the service is ready to receive requests.
+### **2️⃣ Register Available Cars**
+**`PUT /cars`**  
+✅ Loads a list of available cars and resets previous data  
 
-### PUT /cars
-
-Load the list of available cars in the service and remove all previous data
-(reset the application state). This method may be called more than once during
-the life cycle of the service.
-
-**Body** _required_ The list of cars to load.
-
-**Content Type** `application/json`
-
-Sample:
-
+📌 **Request Body Example**
 ```json
 [
-  {
-    "id": 1,
-    "seats": 4
-  },
-  {
-    "id": 2,
-    "seats": 6
-  }
+  { "id": 1, "seats": 4 },
+  { "id": 2, "seats": 6 }
 ]
 ```
 
-Responses:
+📌 **Responses**
+- ✅ `200 OK` → Cars successfully registered  
+- ❌ `400 Bad Request` → Invalid format  
 
-* **200 OK** When the list is registered correctly.
-* **400 Bad Request** When there is a failure in the request format, expected
-  headers, or the payload can't be unmarshalled.
+---
 
-### POST /journey
+### **3️⃣ Request a Journey**
+**`POST /journey`**  
+✅ Assigns a group to a car or adds it to the waiting list if no car is available.  
 
-A group of people requests to perform a journey.
-
-**Body** _required_ The group of people that wants to perform the journey
-
-**Content Type** `application/json`
-
-Sample:
-
+📌 **Request Body Example**
 ```json
-{
-  "id": 1,
-  "people": 4
-}
+{ "id": 1, "people": 4 }
 ```
 
-Responses:
+📌 **Responses**
+- ✅ `200 OK` → Group assigned to a car  
+- ✅ `202 Accepted` → No car available, group added to the waiting list  
+- ❌ `400 Bad Request` → Invalid format  
 
-* **200 OK** or **202 Accepted** When the group is registered correctly
-* **400 Bad Request** When there is a failure in the request format or the
-  payload can't be unmarshalled.
+---
 
-### POST /dropoff
+### **4️⃣ Drop Off a Group**
+**`POST /dropoff`**  
+✅ Removes a group from the system and frees up car seats  
 
-A group of people requests to be dropped off. Whether they traveled or not.
-
-**Body** _required_ A form with the group ID, such that `ID=X`
-
-**Content Type** `application/x-www-form-urlencoded`
-
-Responses:
-
-* **200 OK** or **204 No Content** When the group is unregistered correctly.
-* **404 Not Found** When the group is not to be found.
-* **400 Bad Request** When there is a failure in the request format or the
-  payload can't be unmarshalled.
-
-### POST /locate
-
-Given a group ID such that `ID=X`, return the car the group is traveling
-with, or no car if they are still waiting to be served.
-
-**Body** _required_ A url encoded form with the group ID such that `ID=X`
-
-**Content Type** `application/x-www-form-urlencoded`
-
-**Accept** `application/json`
-
-Responses:
-
-* **200 OK** With the car as the payload when the group is assigned to a car. See below for the expected car representation 
-```json
-  {
-    "id": 1,
-    "seats": 4
-  }
+📌 **Request Body Example**
+```bash
+ID=1
 ```
 
-* **204 No Content** When the group is waiting to be assigned to a car.
-* **404 Not Found** When the group is not to be found.
-* **400 Bad Request** When there is a failure in the request format or the
-  payload can't be unmarshalled.
+📌 **Responses**
+- ✅ `200 OK` → Group removed  
+- ❌ `404 Not Found` → Group does not exist  
 
-## Tooling
+---
 
-At Cabify, we use Gitlab and Gitlab CI for our backend development work. 
-In this repo you may find a [.gitlab-ci.yml](./.gitlab-ci.yml) file which
-contains some tooling that would simplify the setup and testing of the
-deliverable. This testing can be enabled by simply uncommenting the final
-acceptance stage. Note that the image build should be reproducible within
-the CI environment.
+### **5️⃣ Locate a Group**
+**`POST /locate`**  
+✅ Finds which car a group is assigned to, or if they are still waiting  
 
-Additionally, you will find a basic Dockerfile which you could use a
-baseline, be sure to modify it as much as needed, but keep the exposed port
-as is to simplify the testing.
+📌 **Request Body Example**
+```bash
+ID=1
+```
 
-:warning: Avoid dependencies and tools that would require changes to the 
-`acceptance` step of [.gitlab-ci.yml](./.gitlab-ci.yml), such as 
-`docker-compose`
+📌 **Responses**
+- ✅ `200 OK` → Returns assigned car details  
+```json
+{ "id": 1, "seats": 4 }
+```
+- ✅ `204 No Content` → Group is still waiting  
+- ❌ `404 Not Found` → Group does not exist  
 
-:warning: The challenge needs to be self-contained so we can evaluate it. 
-If the language you are using has limitations that block you from solving this 
-challenge without using a database, please document your reasoning in the 
-readme and use an embedded one such as sqlite.
+---
 
-You are free to use whatever programming language you deem is best to solve the
-problem but please bear in mind we want to see your best!
+## 🛠️ Technical Decisions
 
-You can ignore the Gitlab warning "Cabify Challenge has exceeded its pipeline 
-minutes quota," it will not affect your test or the ability to run pipelines on
-Gitlab.
+### **1️⃣ Optimized Data Structures**
+✅ `Map<number, Car>` instead of `Array<Car>` → Fast lookups in `O(1)`.  
+✅ `Map<number, Group>` instead of `Array<Group>` → Optimized FIFO queue for waiting groups.  
 
-## Requirements
+### **2️⃣ Performance Optimization**
+✅ Stress-tested with `100,000+` cars & groups in `performance.test.ts`.  
+✅ Processing remains under `40s`, ensuring scalability.  
 
-- The service should be as efficient as possible.
-  It should be able to work reasonably well with at least $`10^4`$ / $`10^5`$ cars / waiting groups.
-  Explain how you did achieve this requirement.
-- You are free to modify the repository as much as necessary to include or remove
-  dependencies, subject to tooling limitations above.
-- Document your decisions using MRs or in this very README adding sections to it,
-  the same way you would be generating documentation for any other deliverable.
-  We want to see how you operate in a quasi real work environment.
+### **3️⃣ Docker Compatibility**
+✅ Port set to `9091` for compatibility with Cabify's requirements.  
+✅ Respects original `Dockerfile` structure while adapting for Node.js.  
 
-## Feedback
+---
 
-In Cabify, we really appreciate your interest and your time. We are highly 
-interested on improving our Challenge and the way we evaluate our candidates. 
-Hence, we would like to beg five more minutes of your time to fill the 
-following survey:
+## ✅ Final Notes
+🚀 Project fully functional and ready for production-level deployment.  
+📌 Scalable, optimized, fully tested, and Docker-ready.  
 
-- https://forms.gle/EzPeURspTCLG1q9T7
+---
 
-Your participation is really important. Thanks for your contribution!
+## 👤 Author
+Carlos Zulueta
